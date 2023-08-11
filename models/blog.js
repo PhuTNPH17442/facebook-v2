@@ -10,5 +10,6 @@ const blogSchema = new Schema({
     context:String,
     image:String
 })
+
  const Blog = mongoose.model("blog",blogSchema)
  module.exports = Blog

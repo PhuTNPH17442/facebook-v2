@@ -7,7 +7,10 @@ const methodOverride = require('method-override')
 const multer = require('multer')
 const auth = require('./routes/auth')
 const post = require('./routes/blog')
+const friend = require('./routes/friend')
 const User = require('./models/User')
+const Friend = require('./models/friend')
+const mine = require('./routes/status')
 const path = require('path')
 const { error } = require('console');
 const Blog = require('./models/blog');
@@ -49,10 +52,15 @@ app.engine('hbs', handlebar.engine({
     runtimeOptions: {
       allowProtoPropertiesByDefault: true,
       allowProtoMethodsByDefault: true,
+    },helpers: {
+      eq: function (a, b) {
+        return a === b;
+      },
     },
 }))
 app.set('view engine', 'hbs')
 app.set('views', path.join(__dirname, 'views'))
+
 //midle
 app.use(methodOverride('_method'))
 app.use(session({
@@ -69,7 +77,9 @@ app.get('/',checkLogin, async(req, res) => {
     blogs.forEach(blog =>{
       blog.formattedDate = blog.createAt.toLocaleDateString();
     })
-    res.render('home', { title: "Home",userData,userId,blogs})
+    const friendRq = await Friend.find({userId2:userId,status:"pending"}).populate('userId1','username avatar').exec()
+    
+    res.render('home', { title: "Home",userData,userId,blogs,friendRq })
 })
 app.get('/login', (req, res) => {
     res.render('login', { title: "Login" })
@@ -111,8 +121,26 @@ app.post('/upload', upload.single('avatar'), async (req, res) => {
     // Trả về thông báo thành công
     res.send('Upload thành công!');
   });
+app.get('/listFriend', async(req,res)=>{
+  const userData = req.session.userData;
+  const userId = req.session.userId;
+//   const friendRq = await Friend.find({$or: [
+//     { userId1: userId, status: "accepted" },
+//     { userId2: userId, status: "accepted" }
+//   ]
+// })
+// .populate([
+//   { path: 'userId1', select: 'username avatar' },
+//   { path: 'userId2', select: 'username avatar' }
+// ]).exec()
+const friendRq = await Friend.find({userId1: userId,status:"accepted"}).populate("userId2","username avatar").exec();
+const friendRq1 = await Friend.find({userId2:userId,status:"accepted"}).populate("userId1","username avatar").exec();
+  res.render('myFriend',{title:"My Friend",userData,friendRq,friendRq1,userId})
+})
 app.use('/',auth)
 app.use('/',post)
+app.use('/',mine)
+app.use('/',friend)
 app.listen(3000, () => {
     console.log('localhost3000')
 })
