@@ -60,10 +60,24 @@ const processFriendRequest = async(req,res,next)=>{
         res.status(500).json({message:"Lỗi"})
     }
 }
-const deleteRequest = async (req,res,next)=>{
-
+const deleteFriend = async (req,res,next)=>{
+    const userId2 = req.query.userId2
+    const userId = req.session.userId
+    console.log(userId2)
+    try {
+        await Friend.findOneAndDelete({
+            $or:[
+                { userId1: userId, userId2: userId2 },
+                { userId1: userId2, userId2: userId },
+            ]
+        })
+        res.send('Friend removed successfully')
+    } catch (error) {
+        console.log(error)
+    }
+    
 }
 
 module.exports = {
-    sendFriendReq,processFriendRequest
+    sendFriendReq,processFriendRequest,deleteFriend
 }

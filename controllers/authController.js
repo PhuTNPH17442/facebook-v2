@@ -8,12 +8,29 @@ const register = async (req, res, next) => {
   try {
     
     const { username, email, password } = req.body
+    const errors = []
+    if (!username) {
+      errors.push('Username is required');
+    }
     
-    const userExists = await User.findOne({ email, username });
+    if (!email) {
+      errors.push('Email is required');
+    }
+    
+    if (!password) {
+      errors.push('Password is required');
+    }
+    const userExists = await User.findOne({ $or: [{ email }, { username }] });
     if (userExists) {
-      return res.status(400).json({
-        message: 'Email or Phone already exists'
-      })
+      errors.push('Username or Email already exists')
+    }
+    if (password.length < 6) {
+      errors.push('Password must be at least 6 characters');
+    }
+
+    // Nếu có lỗi, chuyển hướng về trang đăng ký với mảng lỗi
+    if (errors.length > 0) {
+      return res.status(400).render('register', {title:"Register", errors });
     }
     
     // Đọc ảnh mặc định và chuyển đổi thành chuỗi base64
@@ -34,34 +51,45 @@ const register = async (req, res, next) => {
     const token = jwt.sign({ userID: userSaved._id }, process.env.JWT_SECRET, {
       expiresIn: '1h',
     })
-    const userData = { username: user.username, avatar: user.avatar }
-    res.status(200).render('home', { userData, token })
+    req.session.userId = user._id;
+    req.session.token = token;
+    req.session.userData = { username: user.username, avatar: user.avatar,description:user.description }
+    const userData = { username: user.username, avatar: user.avatar,description:user.description }
+    res.status(200).redirect('/')
   } catch (error) {
-    res.status(500).redirect('/')
+    console.log(error)
+    // res.status(500).redirect('/')
   }
 }
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    const errors = []
 
+    if (!email) {
+      errors.push('Email is required');
+    }
+    
+    if (!password) {
+      errors.push('Password is required');
+    }
     // Find user by email
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(401).json({
-        message: 'Invalid email or password'
-      });
+      errors.push("Email does not exist")
     }
 
     // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(401).json({
-        message: 'Invalid email or password'
-      });
+      errors.push("Invalid email or password")
     }
 
+    if(errors.length>0){
+      return res.status(400).render('login', {title:"Login", errors });
+    }
     // Generate token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: '1h'
@@ -92,23 +120,11 @@ const update = async(req,res,next)=>{
   }
 }
 const logout = async (req, res, next) => {
-  const token = req.header('x-auth-token');
-  if (!token) {
-    return res.status(401).json({ msg: 'No token, authorization denied' });
-  }
+  req.session.userId = null;
+  req.session.token = null;
 
-  try {
-    const jwtSecret = process.env.JWT_SECRET;
-    const decoded = jwt.verify(token, jwtSecret);
-
-    // Remove token from blacklist or database if necessary
-
-    // Respond with success message
-    res.json({ msg: 'User logged out successfully' });
-  } catch (err) {
-    // Respond with error message
-    res.status(500).json({ msg: 'Server error' });
-  }
+  // Chuyển hướng người dùng về trang chính hoặc trang đăng nhập
+  res.redirect('/');
 }
 module.exports = {
   register, login, logout,update

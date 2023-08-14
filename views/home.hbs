@@ -124,23 +124,21 @@
         width: 60px;
         object-fit: cover;
       }
+      #logout-btn:hover {
+  cursor: pointer;
+  /* Thêm các kiểu hiển thị khác tùy theo mong muốn */
+}
     </style>
 
     <div class="left">
       <ul>
         {{#if userData}}
-        <li class="poff"><img class="propif" src="data:image/jpeg;base64,{{userData.avatar}}" alt="">
-          {{userData.username}}</li>
+        <li class="poff"><a href="/myFace"><img class="propif" src="data:image/jpeg;base64,{{userData.avatar}}" alt="">
+          {{userData.username}}</a></li>
 
         <li><a href="/listFriend"><img src="https://img.icons8.com/color/48/null/group.png" />Friends</a></li>
-        <li><img src="https://img.icons8.com/color/48/null/overtime.png" /> Most Recent</li>
-        <li><img src="https://img.icons8.com/color/48/null/people-skin-type-7.png" /> Groups</li>
-        <li><img src="https://img.icons8.com/color/48/null/online-store.png" />Marketplace</li>
-        <li><img src="https://img.icons8.com/color/48/null/tv-show.png" />Watch</li>
-        <li><img src="https://img.icons8.com/color/48/null/clock--v4.png" /> Memories</li>
-        <li><img src="https://img.icons8.com/color/48/null/save-close--v1.png" /> Saved</li>
-        <li><img src="https://img.icons8.com/color/48/null/ingredients-list.png" />Pages</li>
-        <li><img src="https://img.icons8.com/color/48/null/instagram-reel.png" />Reels</li>
+
+        <li><a id="logout-btn"><img src="https://img.icons8.com/color/48/null/instagram-reel.png" />Logout</a></li>
       </ul>
     </div>
     <style>
@@ -258,8 +256,9 @@
         background-color: white;
         box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
       }
-      .friend-request h1{
-         font-size: 26px;
+
+      .friend-request h1 {
+        font-size: 26px;
       }
 
       .friend-request .card-nfriend {
@@ -420,7 +419,17 @@
         });
     }
   </script>
-
+  <script>
+    const logoutBtn = document.getElementById('logout-btn');
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await fetch('/logout', { method: 'POST' });
+        window.location.href = '/'; // redirect to home page
+      } catch (error) {
+        console.error(error);
+      }
+    });
+  </script>
 </body>
 
 </html>

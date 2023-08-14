@@ -2,9 +2,11 @@ const express = require('express')
 const handlebar = require('express-handlebars')
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose')
+const http = require('http')
 const session = require('express-session')
 const methodOverride = require('method-override')
 const multer = require('multer')
+const socketIo = require('socket.io')
 const auth = require('./routes/auth')
 const post = require('./routes/blog')
 const friend = require('./routes/friend')
@@ -15,6 +17,8 @@ const path = require('path')
 const { error } = require('console');
 const Blog = require('./models/blog');
 const app = express()
+const server = http.createServer(app)
+const io = socketIo(server)
 require('dotenv').config()
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname,'public')));
@@ -124,18 +128,12 @@ app.post('/upload', upload.single('avatar'), async (req, res) => {
 app.get('/listFriend', async(req,res)=>{
   const userData = req.session.userData;
   const userId = req.session.userId;
-//   const friendRq = await Friend.find({$or: [
-//     { userId1: userId, status: "accepted" },
-//     { userId2: userId, status: "accepted" }
-//   ]
-// })
-// .populate([
-//   { path: 'userId1', select: 'username avatar' },
-//   { path: 'userId2', select: 'username avatar' }
-// ]).exec()
 const friendRq = await Friend.find({userId1: userId,status:"accepted"}).populate("userId2","username avatar").exec();
 const friendRq1 = await Friend.find({userId2:userId,status:"accepted"}).populate("userId1","username avatar").exec();
   res.render('myFriend',{title:"My Friend",userData,friendRq,friendRq1,userId})
+})
+app.get('/message', async(req,res)=>{
+  res.render('message',{title:"Messager"})
 })
 app.use('/',auth)
 app.use('/',post)
