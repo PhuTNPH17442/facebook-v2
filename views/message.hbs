@@ -88,9 +88,12 @@ button {
   <div class="container">
     <div class="friends-list">
       <ul>
-        <li class="friend">Friend 1</li>
-        <li class="friend">Friend 2</li>
-        <li class="friend">Friend 3</li>
+        {{#each friendRq1 }}
+        <li class="friend">{{userId1.username}}</li>
+        {{/each}}
+        {{#each friendRq}}
+        <li class="friend">{{userId2.username}}</li>
+        {{/each}}
         <!-- Danh sách bạn bè -->
       </ul>
     </div>

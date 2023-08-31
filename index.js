@@ -12,6 +12,7 @@ const post = require('./routes/blog')
 const friend = require('./routes/friend')
 const User = require('./models/User')
 const Friend = require('./models/friend')
+const Message = require('./models/friend')
 const mine = require('./routes/status')
 const path = require('path')
 const { error } = require('console');
@@ -133,7 +134,12 @@ const friendRq1 = await Friend.find({userId2:userId,status:"accepted"}).populate
   res.render('myFriend',{title:"My Friend",userData,friendRq,friendRq1,userId})
 })
 app.get('/message', async(req,res)=>{
-  res.render('message',{title:"Messager"})
+  const userId = req.session.userId;
+  const friendRq = await Friend.find({userId1: userId,status:"accepted"}).populate("userId2","username avatar").exec();
+  const friendRq1 = await Friend.find({userId2:userId,status:"accepted"}).populate("userId1","username avatar").exec();
+  // const message = await Message.find().populate("sender recipient").exec();
+
+  res.render('message',{title:"Messager",friendRq,friendRq1,userId})
 })
 app.use('/',auth)
 app.use('/',post)

@@ -66,25 +66,24 @@ const login = async (req, res, next) => {
     const { email, password } = req.body;
     const errors = []
 
-    if (!email) {
-      errors.push('Email is required');
-    }
+    // if (!email) {
+    //   errors.push('Email is required');
+    // }
     
-    if (!password) {
-      errors.push('Password is required');
-    }
+    // if (!password) {
+    //   errors.push('Password is required');
+    // }
     // Find user by email
     const user = await User.findOne({ email });
 
     if (!user) {
-      errors.push("Email does not exist")
-    }
-
-    // Compare password
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      errors.push("Invalid email or password")
+      errors.push("Email không tồn tại");
+    } else {
+      const isMatch = await bcrypt.compare(password, user.password);
+      
+      if (!isMatch) {
+        errors.push("Email hoặc mật khẩu không đúng");
+      }
     }
 
     if(errors.length>0){
