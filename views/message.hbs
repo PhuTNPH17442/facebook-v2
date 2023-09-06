@@ -9,17 +9,19 @@
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
+  height: 100%;
   background-color: #f2f2f2;
 }
 
-.container {
+.chat-all {
+  margin-top: 100px;
   display: flex;
-  height: 100vh;
+  height: 90vh;
 }
 
 .friends-list {
   width: 25%;
-  background-color: #333;
+  background-color: #007bff;
   color: white;
   padding: 20px;
 }
@@ -31,7 +33,7 @@
 
 .friend {
   padding: 10px;
-  border-bottom: 1px solid #555;
+  border-bottom: 1px solid #1072f1;
   cursor: pointer;
 }
 
@@ -48,6 +50,7 @@
   border-radius: 10px;
   padding: 20px;
   overflow-y: scroll;
+  display: flex;
 }
 
 .input-box {
@@ -72,34 +75,103 @@ button {
   border-radius: 5px;
   cursor: pointer;
 }
+nav {
+      background-color: rgb(255, 255, 255);
+      position: fixed !important;
+      width: 100vw;
+      top: 0;
+      height: 10vh;
+      z-index: 200;
+      box-shadow: 0 1px 10px grey;
 
+    }
+
+    nav i {
+      font-size: 2.5vmax;
+      margin: 0 1vmax;
+    }
+
+    .ri-home-4-fill {
+      padding-bottom: 5px;
+      border-bottom: 2px solid royalblue;
+      color: royalblue;
+    }
+@media screen and (max-width: 768px) {
+  .container {
+    margin-top: 10vh; /* Chiều cao của nav */
+  }
+}
+.recipdent-chat{
+  flex: 1;
+  height: max-content;
+  width: max-content;
+  color: white;
+  text-align: center;
+ border-radius: 10px;
+ background-color: #007bff;
+}
+.sender-chat{
+  flex: 1;
+  height: max-content;
+  width: max-content;
+  color: #007bff;
+  border: 2px solid #cccfd3;
+  text-align: center;
+ border-radius: 10px;
+ background-color: white;
+ left: 0;
+}
     </style>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.2.0/fonts/remixicon.css" rel="stylesheet">
+  <!-- CSS only -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
 </head>
 <body>
-    <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="styles.css">
-  <title>Chat App</title>
-</head>
-<body>
-  <div class="container">
+  <nav class="navbar navbar-expand-lg py-3 px-5">
+    <div class="container">
+      <a class="navbar-brand fw-bold fs-1 text-primary" href="/">facebook</a>
+    </div>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link fs-6 mx-2 my-auto" aria-current="page" href="/"><i class="ri-home-4-fill"></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fs-6 mx-2 my-auto" href="/myFace"><i class="ri-bookmark-3-fill"></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fs-6 mx-2 my-auto" href="/ownProfile"><i class="ri-account-circle-fill"></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fs-6 mx-2 my-auto" href="/writePost"><i class="ri-edit-box-fill"></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fs-6 mx-2 my-auto" href="/contact"><i class="ri-contacts-book-2-fill"></i></a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <div class="chat-all">
     <div class="friends-list">
       <ul>
         {{#each friendRq1 }}
-        <li class="friend">{{userId1.username}}</li>
+        <li class="friend" data-user-id="{{userId1.id}}">{{userId1.username}}</li>
         {{/each}}
         {{#each friendRq}}
-        <li class="friend">{{userId2.username}}</li>
+        <li class="friend" data-user-id="{{userId2.id}}">{{userId2.username}}</li>
         {{/each}}
         <!-- Danh sách bạn bè -->
       </ul>
     </div>
     <div class="chat-box">
       <div class="chat">
-        <!-- Cửa sổ chat -->
+        <div class="recipdent-chat">
+           <p style="padding: 4px;">Hello</p>
+        </div>
+        <div class="sender-chat">
+           <p style="padding: 4px;">Hi</p>
+        </div>
       </div>
       <div class="input-box">
         <input type="text" placeholder="Nhập tin nhắn...">
@@ -107,8 +179,61 @@ button {
       </div>
     </div>
   </div>
-</body>
-</html>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+  const friendListItems = document.querySelectorAll(".friend");
 
+  friendListItems.forEach(function (friendListItem) {
+    friendListItem.addEventListener("click", function () {
+      // Lấy giá trị data-user-id từ thuộc tính data
+      const userSender = this.getAttribute("data-user-id");
+
+      // Gửi thông tin đến máy chủ bằng Ajax (Bạn cần thay thế phần này bằng logic gửi Ajax của bạn)
+      sendToServer(userSender);
+    });
+  });
+
+  // Hàm gửi thông tin đến máy chủ
+  function sendToServer(userSender) {
+    // Sử dụng XMLHttpRequest hoặc Fetch API để gửi dữ liệu đến máy chủ
+    // Ví dụ sử dụng Fetch API:
+    fetch(`/message?sender=${userSender}`, {
+      method: "POST",
+      body: JSON.stringify({ userSender }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // Xử lý kết quả từ máy chủ (nếu cần)
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+});
+  </script>
+  <script src="/socket.io/socket.io.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const socket = io();
+
+    // Xử lý khi người dùng gửi tin nhắn
+    document.querySelector('button').addEventListener('click', () => {
+      const message = document.querySelector('input').value;
+      socket.emit('chat message', message);
+      document.querySelector('input').value = '';
+    });
+
+    // Xử lý khi nhận được tin nhắn từ server
+    socket.on('chat message', (message) => {
+      const div = document.createElement('div');
+      div.textContent = message;
+      document.querySelector('.chat').appendChild(div);
+    });
+  });
+</script>
 </body>
 </html>

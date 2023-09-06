@@ -10,6 +10,7 @@ const socketIo = require('socket.io')
 const auth = require('./routes/auth')
 const post = require('./routes/blog')
 const friend = require('./routes/friend')
+const mess = require('./routes/mess')
 const User = require('./models/User')
 const Friend = require('./models/friend')
 const Message = require('./models/friend')
@@ -65,6 +66,18 @@ app.engine('hbs', handlebar.engine({
 }))
 app.set('view engine', 'hbs')
 app.set('views', path.join(__dirname, 'views'))
+//socket connection 
+io.on('connection', (socket) => {
+  console.log('Client đã kết nối với Socket.io');
+  socket.on('chat message', (message) => {
+    io.emit('chat message', message);
+  });
+
+  // Xử lý sự kiện khi client ngắt kết nối
+  socket.on('disconnect', () => {
+    console.log('Client đã ngắt kết nối');
+  });
+});
 
 //midle
 app.use(methodOverride('_method'))
@@ -145,6 +158,7 @@ app.use('/',auth)
 app.use('/',post)
 app.use('/',mine)
 app.use('/',friend)
+app.use('/',mess)
 app.listen(3000, () => {
     console.log('localhost3000')
 })
